@@ -1,0 +1,39 @@
+{
+  "name": "cerbero",
+  "version": "0.0.1",
+  "description": "A Microservices Nodejs Gateway",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production ./node_modules/nodemon/bin/nodemon.js index.js -e yaml,yml,js,jsx,json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/riktar/cerbero.git"
+  },
+  "keywords": [
+    "node",
+    "gateway",
+    "fastify",
+    "javascript"
+  ],
+  "author": "Riccardo Tartaglia",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/riktar/cerbero/issues"
+  },
+  "homepage": "https://github.com/riktar/cerbero#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "fast-proxy": "^1.4.1",
+    "fastify": "^2.12.0",
+    "fastify-autoload": "^1.2.2",
+    "fastify-cors": "^3.0.2",
+    "fastify-plugin": "^1.6.1",
+    "path-to-regexp": "^6.1.0",
+    "yaml": "^1.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
