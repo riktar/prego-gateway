@@ -12,7 +12,7 @@ const fastify = require("fastify")({logger: true});
 
 //CORS
 fastify.register(require("fastify-cors"), {});
-fastify.register(require("./plugins/cerbero"), {});
+fastify.register(require("./cerbero"), {});
 
 
 // Run the server

@@ -28,7 +28,7 @@ module.exports = fp(async function (fastify, opts) {
     parseRules() {
       const allFiles = []
       const allRules = []
-      const dir = `${__dirname}/../${process.env.RULES_FOLDER}`
+      const dir = `${__dirname}/${process.env.RULES_FOLDER}`
 
       const files = fs.readdirSync(dir).map(f => path.join(dir, f))
       allFiles.push(...files)
