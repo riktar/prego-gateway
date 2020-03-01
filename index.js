@@ -6,6 +6,7 @@
 
 // ENV
 require("dotenv").config();
+const fs = require('fs')
 
 // Require the framework and instantiate it
 const fastify = require("fastify")({logger: true});

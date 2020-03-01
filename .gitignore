@@ -1,8 +1,9 @@
 # Logs
 package-lock.json
 logs
-rules/*.yml
+rules/*
 certs/*
+!.ignore
 *.log
 npm-debug.log*
 yarn-debug.log*
