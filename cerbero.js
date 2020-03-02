@@ -11,7 +11,7 @@ const fp = require("fastify-plugin");
 const YAML = require("yaml");
 const path = require("path");
 const fs = require("fs");
-const { pathToRegexp, match, parse, compile } = require("path-to-regexp");
+const { pathToRegexp } = require("path-to-regexp");
 
 module.exports = fp(async function(fastify, opts) {
   class Cerbero {
