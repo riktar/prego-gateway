@@ -6,21 +6,36 @@
 
 // ENV
 require("dotenv").config();
-const fs = require('fs')
+
+const AutoLoad = require("fastify-autoload");
+const path = require("path");
 
 // Require the framework and instantiate it
-const fastify = require("fastify")({logger: true});
+const fastify = require("fastify")({
+  /*logger: {
+    file: './logs/cerbero.log'
+  }*/
+  logger: {
+    prettyPrint: true
+  }
+});
 
 //CORS
 fastify.register(require("fastify-cors"), {});
 fastify.register(require("./cerbero"), {});
 
+fastify.register(AutoLoad, {
+  dir: path.join(__dirname + "/", "plugins")
+});
 
 // Run the server
 const start = async () => {
   try {
-    await fastify.ready()
-    await fastify.cerbero.start(80, '0.0.0.0')
+    await fastify.ready();
+    await fastify.cerbero.start(
+      process.env.PORT ? process.env.PORT : 80,
+      "0.0.0.0"
+    );
   } catch (err) {
     fastify.log.error(err);
     //process.exit(1);

@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.2",
+    "pino-pretty": "^3.6.0",
     "prettier": "^1.19.1"
   }
 }

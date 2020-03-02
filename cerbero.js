@@ -11,9 +11,9 @@ const fp = require("fastify-plugin");
 const YAML = require("yaml");
 const path = require("path");
 const fs = require("fs");
-const { pathToRegexp } = require("path-to-regexp");
+const {pathToRegexp} = require("path-to-regexp");
 
-module.exports = fp(async function(fastify, opts) {
+module.exports = fp(async function (fastify, opts) {
   class Cerbero {
     /**
      * Constructor
@@ -60,7 +60,7 @@ module.exports = fp(async function(fastify, opts) {
      * @returns {boolean[]}
      */
     match(request) {
-      const { headers } = request;
+      const {headers} = request;
       const rules = fastify.cerbero.rules;
       const [host, port = 80] = headers.host.split(":");
       const rule = rules.find(rule => rule.listener.host === host);
@@ -91,6 +91,16 @@ module.exports = fp(async function(fastify, opts) {
 
       return [route, pureUrl];
     }
+
+    /**
+     * Invoke a plugin
+     * @param plugin
+     * @param request
+     * @param opts
+     */
+    invoke(plugin, request, opts) {
+      fastify[plugin](request, opts)
+    }
   }
 
   /**
@@ -100,8 +110,14 @@ module.exports = fp(async function(fastify, opts) {
     try {
       // check if found a rule for this host
       const [route, pureUrl] = fastify.cerbero.match(request);
+      const {preHandler = {}} = route
+      const {plugin = null, opts = null} = preHandler;
 
-      const { proxy } = require("fast-proxy")({
+      if (plugin) {
+        fastify.cerbero.invoke(plugin, request, opts)
+      }
+
+      const {proxy} = require("fast-proxy")({
         base: route.target,
         undici: true
       });

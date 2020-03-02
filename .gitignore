@@ -1,6 +1,6 @@
 # Logs
 package-lock.json
-logs
+logs/*
 rules/*
 certs/*
 !.ignore
