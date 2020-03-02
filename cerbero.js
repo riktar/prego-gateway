@@ -1,5 +1,5 @@
 /**
- * @description Ruler Class
+ * @description Cerbero - Simple HTTP Gateway
  * @author Riccardo Tartaglia
  */
 "use strict";
@@ -15,14 +15,27 @@ const { pathToRegexp, match, parse, compile } = require("path-to-regexp");
 
 module.exports = fp(async function(fastify, opts) {
   class Cerbero {
+    /**
+     * Constructor
+     */
     constructor() {
       this.rules = this.parseRules();
     }
 
+    /**
+     * Start a new server
+     * @param port
+     * @param host
+     * @returns {Promise<void>}
+     */
     async start(port, host) {
       await fastify.listen(port, host);
     }
 
+    /**
+     * Parse thee yml files in array
+     * @returns {[]}
+     */
     parseRules() {
       const allFiles = [];
       const allRules = [];
@@ -41,6 +54,11 @@ module.exports = fp(async function(fastify, opts) {
       return allRules;
     }
 
+    /**
+     * Try to match a proxy rule
+     * @param request
+     * @returns {boolean[]}
+     */
     match(request) {
       const { headers } = request;
       const rules = fastify.cerbero.rules;
@@ -75,8 +93,9 @@ module.exports = fp(async function(fastify, opts) {
     }
   }
 
-  fastify.decorate("cerbero", new Cerbero());
-
+  /**
+   * When a route of fastify not found, attempt to proxy
+   */
   fastify.setNotFoundHandler((request, reply) => {
     try {
       // check if found a rule for this host
@@ -96,4 +115,7 @@ module.exports = fp(async function(fastify, opts) {
       );
     }
   });
+
+  // decorate fastify
+  fastify.decorate("cerbero", new Cerbero());
 });
