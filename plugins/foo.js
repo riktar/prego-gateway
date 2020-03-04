@@ -7,10 +7,11 @@
 // ENV
 require("dotenv").config();
 
-const fp = require("fastify-plugin");
-module.exports = fp(async function(fastify, opts) {
-  function main(request, opts) {
-    console.log("you call me!", opts);
+module.exports = async function({ cerbero }) {
+  function main(request, reply, opts) {
+    /* ... */
+    // if you want deny the request
+    // cerbero.deny()
   }
-  fastify.decorate("foo", main);
-});
+  cerbero.decorate("foo", main);
+};

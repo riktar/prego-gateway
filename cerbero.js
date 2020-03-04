@@ -11,15 +11,40 @@ const fp = require("fastify-plugin");
 const YAML = require("yaml");
 const path = require("path");
 const fs = require("fs");
-const {pathToRegexp} = require("path-to-regexp");
+const { pathToRegexp } = require("path-to-regexp");
 
-module.exports = fp(async function (fastify, opts) {
+module.exports = fp(async function(fastify, opts) {
   class Cerbero {
     /**
      * Constructor
      */
     constructor() {
       this.rules = this.parseRules();
+    }
+
+    /**
+     * Deny a request throwing an error
+     * @param code
+     */
+    deny(code = "BAD_GATEWAY") {
+      throw new Error(code);
+    }
+
+    /**
+     * Continue a request validation
+     * @param data
+     */
+    continue(data = "OK") {
+      /*...*/
+    }
+
+    /**
+     * Decorate fastify instance
+     * @param name
+     * @param fn
+     */
+    decorate(name, fn) {
+      fastify.decorate(name, fn);
     }
 
     /**
@@ -60,11 +85,11 @@ module.exports = fp(async function (fastify, opts) {
      * @returns {boolean[]}
      */
     match(request) {
-      const {headers} = request;
+      const { headers } = request;
       const rules = fastify.cerbero.rules;
       const [host, port = 80] = headers.host.split(":");
       const rule = rules.find(rule => rule.listener.host === host);
-      if (!rule) throw new Error();
+      if (!rule) throw new Error("NOT_FOUND");
 
       // check if the url match
       let pureUrl = false;
@@ -86,8 +111,8 @@ module.exports = fp(async function (fastify, opts) {
           break;
         }
       }
-      if (!route) throw new Error();
-      if (!checkPath) throw new Error();
+      if (!route) throw new Error("NOT_FOUND");
+      if (!checkPath) throw new Error("NOT_FOUND");
 
       return [route, pureUrl];
     }
@@ -99,7 +124,33 @@ module.exports = fp(async function (fastify, opts) {
      * @param opts
      */
     invoke(plugin, request, opts) {
-      fastify[plugin](request, opts)
+      return fastify[plugin](request, opts);
+    }
+
+    errorManager(e, reply) {
+      reply.type("text/html");
+      let toSend = [];
+      switch (e.message) {
+        case "NOT_FOUND":
+          toSend = [
+            `<h1 style="text-align: center">Resource Not Found</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            404
+          ];
+          break;
+        case "BAD_GATEWAY":
+          toSend = [
+            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            502
+          ];
+          break;
+        case "FORBIDDEN":
+          toSend = [
+            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            403
+          ];
+          break;
+      }
+      reply.send(...toSend);
     }
   }
 
@@ -107,28 +158,29 @@ module.exports = fp(async function (fastify, opts) {
    * When a route of fastify not found, attempt to proxy
    */
   fastify.setNotFoundHandler((request, reply) => {
+    const { cerbero } = fastify;
     try {
-      // check if found a rule for this host
-      const [route, pureUrl] = fastify.cerbero.match(request);
-      const {preHandler = {}} = route
-      const {plugin = null, opts = null} = preHandler;
+      const [route, pureUrl] = cerbero.match(request);
+      const { preHandler = [] } = route;
 
-      if (plugin) {
-        fastify.cerbero.invoke(plugin, request, opts)
+      // call preHandler
+      if (preHandler.length > 0) {
+        for (let key in preHandler) {
+          let { plugin = null, opts = null } = preHandler[key];
+          if (plugin) {
+            cerbero.invoke(plugin, request, reply, opts);
+          }
+        }
       }
 
-      const {proxy} = require("fast-proxy")({
+      const { proxy } = require("fast-proxy")({
         base: route.target,
         undici: true
       });
 
       proxy(request.req, reply.res, pureUrl, {});
     } catch (e) {
-      reply.type("text/html");
-      reply.send(
-        `<h1 style="text-align: center">Resource Not Found</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
-        404
-      );
+      cerbero.errorManager(e, reply);
     }
   });
 
