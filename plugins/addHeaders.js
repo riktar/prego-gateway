@@ -6,9 +6,9 @@
 
 module.exports = async function({ cerbero }) {
   function main(request, reply, opts) {
-    /* ... */
-    // if you want deny the request
-    // cerbero.deny()
+    for (let key in opts) {
+      request.req.headers[key] = opts[key];
+    }
   }
-  cerbero.decorate("foo", main);
+  cerbero.decorate("addHeaders", main);
 };
