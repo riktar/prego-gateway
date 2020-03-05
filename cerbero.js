@@ -12,6 +12,14 @@ const { pathToRegexp } = require("path-to-regexp");
 const FastProxy = require("fast-proxy");
 
 module.exports = fp(async function(fastify, opts) {
+
+  /**
+   * Accepts all content type
+   */
+  fastify.addContentTypeParser("*", function(req, done) {
+    done();
+  });
+
   class Cerbero {
     /**
      * Constructor
@@ -19,6 +27,7 @@ module.exports = fp(async function(fastify, opts) {
     constructor() {
       this.proxy = [];
       this.rules = this.parseRules();
+      this.setNotFoundHook();
     }
 
     getProxy(base) {
@@ -42,14 +51,6 @@ module.exports = fp(async function(fastify, opts) {
      */
     deny(code = "BAD_GATEWAY") {
       throw new Error(code);
-    }
-
-    /**
-     * Continue a request validation
-     * @param data
-     */
-    continue(data = "OK") {
-      /*...*/
     }
 
     /**
@@ -166,44 +167,38 @@ module.exports = fp(async function(fastify, opts) {
       }
       reply.send(...toSend);
     }
-  }
 
-  /**
-   * Accepts all content type
-   */
-  fastify.addContentTypeParser("*", function(req, done) {
-    done();
-  });
+    /**
+     * When a route of fastify not found, attempt to proxy
+     */
+    setNotFoundHook(){
+      fastify.setNotFoundHandler((request, reply) => {
+        try {
+          const [route, pureUrl] = this.match(request);
+          const { handlers = [] } = route;
 
-  /**
-   * When a route of fastify not found, attempt to proxy
-   */
-  fastify.setNotFoundHandler((request, reply) => {
-    const { cerbero } = fastify;
-    try {
-      const [route, pureUrl] = cerbero.match(request);
-      const { handlers = [] } = route;
-
-      // call preHandler
-      if (handlers.length > 0) {
-        for (let key in handlers) {
-          let { plugin = null, opts = null } = handlers[key];
-          if (plugin) {
-            cerbero.invoke(plugin, request, reply, opts);
+          // call preHandler
+          if (handlers.length > 0) {
+            for (let key in handlers) {
+              let { plugin = null, opts = null } = handlers[key];
+              if (plugin) {
+                this.invoke(plugin, request, reply, opts);
+              }
+            }
           }
-        }
-      }
 
-      // pass the body in the request
-      if (request.method !== "HEAD" && request.method !== "GET") {
-        request.req.body = request.body;
-      }
-      // proxy the request
-      cerbero.getProxy(route.target)(request.req, reply.res, `${pureUrl}`);
-    } catch (e) {
-      cerbero.errorManager(e, reply);
+          // pass the body in the request
+          if (request.method !== "HEAD" && request.method !== "GET") {
+            request.req.body = request.body;
+          }
+          // proxy the request
+          this.getProxy(route.target)(request.req, reply.res, `${pureUrl}`);
+        } catch (e) {
+          this.errorManager(e, reply);
+        }
+      });
     }
-  });
+  }
 
   // decorate fastify
   fastify.decorate("cerbero", new Cerbero());
