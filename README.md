@@ -1,2 +1,2 @@
 # Cerbero
-> A pluggable Nodejs Gateway using Fastify
+> A pluggable Nodejs API Gateway
