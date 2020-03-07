@@ -6,6 +6,7 @@
 
 // ENV
 require("dotenv").config();
+const fs = require("fs")
 
 const AutoLoad = require("fastify-autoload");
 const path = require("path");
@@ -17,9 +18,15 @@ const logger =
       : { file: "./logs/cerbero.log" }
     : null;
 
+const https =
+  process.env.HTTPS === "TRUE"
+    ? { cert: fs.readFileSync(process.env.HTTPS_CERT), key: fs.readFileSync(process.env.HTTPS_KEY) }
+    : null;
+
 // Require the framework and instantiate it
 const fastify = require("fastify")({
-  logger
+  logger,
+  https
 });
 
 fastify.register(require("fastify-cors"), {});
