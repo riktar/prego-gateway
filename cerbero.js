@@ -12,7 +12,6 @@ const { pathToRegexp } = require("path-to-regexp");
 const FastProxy = require("fast-proxy");
 
 module.exports = fp(async function(fastify, opts) {
-
   /**
    * Accepts all content type
    */
@@ -132,18 +131,7 @@ module.exports = fp(async function(fastify, opts) {
       return [route, pureUrl];
     }
 
-    /**
-     * Invoke a plugin
-     * @param plugin
-     * @param request
-     * @param opts
-     */
-    invoke(plugin, request, reply, opts) {
-      return fastify[plugin](request, reply, opts);
-    }
-
-    errorManager(e, reply) {
-      reply.type("text/html");
+    errorManager(e) {
       let toSend = [];
       switch (e.message) {
         case "NOT_FOUND":
@@ -154,47 +142,75 @@ module.exports = fp(async function(fastify, opts) {
           break;
         case "BAD_GATEWAY":
           toSend = [
-            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">${e.message}</p><p style="text-align: center">Cerbero v0.0.1</p>`,
             502
           ];
           break;
         case "FORBIDDEN":
           toSend = [
-            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            `<h1 style="text-align: center">Forbidden</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
             403
           ];
           break;
+        default:
+          toSend = [
+            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">${e.message}</p><p style="text-align: center">Cerbero v0.0.1</p>`,
+            502
+          ];
+          break;
       }
-      reply.send(...toSend);
+      return { error: toSend };
+    }
+
+    /**
+     * Apply all the handlers of the route found
+     * @param route
+     * @param request
+     * @returns {Promise<{}>}
+     */
+    async applyHandlers(route, request) {
+      const { handlers = [] } = route;
+      let toResponse = {};
+      if (handlers.length > 0) {
+        for (let key in handlers) {
+          let { plugin = null, opts = null } = handlers[key];
+          if (plugin) {
+            let data = await fastify[plugin](request, opts);
+            if (data) {
+              toResponse = { ...toResponse, ...data };
+            }
+          }
+        }
+      }
+      return toResponse;
     }
 
     /**
      * When a route of fastify not found, attempt to proxy
      */
-    setNotFoundHook(){
-      fastify.setNotFoundHandler((request, reply) => {
+    setNotFoundHook() {
+      fastify.setNotFoundHandler(async (request, reply) => {
         try {
+          // find a valid route by the Request
           const [route, pureUrl] = this.match(request);
-          const { handlers = [] } = route;
-
-          // call preHandler
-          if (handlers.length > 0) {
-            for (let key in handlers) {
-              let { plugin = null, opts = null } = handlers[key];
-              if (plugin) {
-                this.invoke(plugin, request, reply, opts);
-              }
-            }
-          }
-
-          // pass the body in the request
+          // apply all the handlers and elaborate a possiby Response
+          let toResponse = await this.applyHandlers(route, request);
+          // pass the body in the Request
           if (request.method !== "HEAD" && request.method !== "GET") {
             request.req.body = request.body;
           }
-          // proxy the request
-          this.getProxy(route.target)(request.req, reply.res, `${pureUrl}`);
+          // Proxy if Route has a target
+          if (route.target) {
+            this.getProxy(route.target)(request.req, reply.res, `${pureUrl}`);
+            return;
+          }
+          // else return the elaborate response
+          reply.send(toResponse);
         } catch (e) {
-          this.errorManager(e, reply);
+          let { error } = this.errorManager(e);
+          reply.type("text/html");
+          reply.send(...error);
+          return;
         }
       });
     }

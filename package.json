@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/riktar/cerbero#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "fast-proxy": "^1.4.1",
     "fastify": "^2.12.0",

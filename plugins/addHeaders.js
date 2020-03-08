@@ -5,7 +5,7 @@
 "use strict";
 
 module.exports = async function({ cerbero }) {
-  function main(request, reply, opts) {
+  async function main(request, opts) {
     for (let key in opts) {
       request.req.headers[key] = opts[key];
     }

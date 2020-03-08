@@ -5,7 +5,7 @@
 "use strict";
 
 module.exports = async function({ cerbero }) {
-  function main(request, reply, opts) {
+  async function main(request, reply, opts) {
     /* ... */
     // if you want deny the request
     // cerbero.deny()
