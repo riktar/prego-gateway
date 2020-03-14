@@ -1,15 +1,21 @@
-# Prego API Gateway
-> A fast, simple and pluggable NodeJs API Gateway
 
-`Prego` in Italian means `Please, come in`
+# Prego API Gateway  
+> A fast, simple and pluggable NodeJs API Gateway  
 
-Prego is a pluggable API gateway that allows to managing microservice / serverless applications exposing them through APIs using Node.js and Fastify.
+Prego is a pluggable API Gateway that allows to managing microservice / serverless applications exposing them through APIs using Node.js and Fastify.  
 
-## Features
+#### `Prego` in Italian means `You are welcome!`  
+
+### Start here! **[Read the Documentation](https://app.gitbook.com/@tartaglia-riccardo/s/prego/)**
+  
+## Features  
 - It's 100% JavaScript!
 - Easy to deploy (`sudo npm start` and you are done)
 - Easy to develop a new rule (all the Gateway Rules are .yaml file)
 - Pluggable (All the core is a Fastify Plugin)
-
-## Install
-
+  
+## Coming Soon
+- Test Coverage
+- CLI
+- Docker Image
+- Community Plugins
