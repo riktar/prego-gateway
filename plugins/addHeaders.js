@@ -4,11 +4,11 @@
  */
 "use strict";
 
-module.exports = async function({ cerbero }) {
+module.exports = async function({ prego }) {
   async function main(request, opts) {
     for (let key in opts) {
       request.req.headers[key] = opts[key];
     }
   }
-  cerbero.decorate("addHeaders", main);
+  prego.decorate("addHeaders", main);
 };

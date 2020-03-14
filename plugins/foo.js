@@ -4,11 +4,11 @@
  */
 "use strict";
 
-module.exports = async function({ cerbero }) {
+module.exports = async function({ prego }) {
   async function main(request, reply, opts) {
     /* ... */
     // if you want deny the request
-    // cerbero.deny()
+    // prego.deny()
   }
-  cerbero.decorate("foo", main);
+  prego.decorate("foo", main);
 };

@@ -1,5 +1,5 @@
 /**
- * @description Cerbero - Simple HTTP Gateway
+ * @description Prego - Fast and Pluggable API Gateway
  * @author Riccardo Tartaglia
  */
 "use strict";
@@ -19,7 +19,7 @@ module.exports = fp(async function(fastify, opts) {
     done();
   });
 
-  class Cerbero {
+  class Prego {
     /**
      * Constructor
      */
@@ -37,7 +37,7 @@ module.exports = fp(async function(fastify, opts) {
         const { proxy } = FastProxy({
           base: base,
           undici: true,
-          rejectUnauthorized: false
+          rejectUnauthorized: false,
         });
         this.proxy[base] = proxy;
         return proxy;
@@ -100,7 +100,7 @@ module.exports = fp(async function(fastify, opts) {
      */
     match(request) {
       const { headers } = request;
-      const rules = fastify.cerbero.rules;
+      const rules = fastify.prego.rules;
       const [host, port = 80] = headers.host.split(":");
       const rule = rules.find(rule => rule.listener.host === host);
       if (!rule) throw new Error("NOT_FOUND");
@@ -136,25 +136,25 @@ module.exports = fp(async function(fastify, opts) {
       switch (e.message) {
         case "NOT_FOUND":
           toSend = [
-            `<h1 style="text-align: center">Resource Not Found</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            `<h1 style="text-align: center">Resource Not Found</h1><p style="text-align: center">Prego API Gateway</p>`,
             404
           ];
           break;
         case "BAD_GATEWAY":
           toSend = [
-            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">${e.message}</p><p style="text-align: center">Cerbero v0.0.1</p>`,
+            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">Prego API Gateway</p>`,
             502
           ];
           break;
         case "FORBIDDEN":
           toSend = [
-            `<h1 style="text-align: center">Forbidden</h1><p style="text-align: center">Cerbero v0.0.1</p>`,
+            `<h1 style="text-align: center">Forbidden</h1><p style="text-align: center">Prego API Gateway</p>`,
             403
           ];
           break;
         default:
           toSend = [
-            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">${e.message}</p><p style="text-align: center">Cerbero v0.0.1</p>`,
+            `<h1 style="text-align: center">Bad Gateway</h1><p style="text-align: center">${e.message}</p><p style="text-align: center">Prego API Gateway</p>`,
             502
           ];
           break;
@@ -217,5 +217,5 @@ module.exports = fp(async function(fastify, opts) {
   }
 
   // decorate fastify
-  fastify.decorate("cerbero", new Cerbero());
+  fastify.decorate("prego", new Prego());
 });

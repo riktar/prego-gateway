@@ -5,7 +5,7 @@
 "use strict";
 const axios = require("axios");
 
-module.exports = async function({ cerbero }) {
+module.exports = async function({ prego }) {
   async function joinTarget(targets) {
     let response = {};
     for (let key in targets) {
@@ -26,5 +26,5 @@ module.exports = async function({ cerbero }) {
     return await joinTarget(opts.targets);
   }
 
-  cerbero.decorate("aggregate", main);
+  prego.decorate("aggregate", main);
 };

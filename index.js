@@ -1,5 +1,5 @@
 /**
- * @description A Microservices Nodejs Gateway
+ * @description Start
  * @author Riccardo Tartaglia
  */
 "use strict";
@@ -15,7 +15,7 @@ const logger =
   process.env.LOGGER === "TRUE"
     ? process.env.DEBUG === "TRUE"
       ? { prettyPrint: true }
-      : { file: "./logs/cerbero.log" }
+      : { file: "./logs/prego.log" }
     : null;
 
 const https =
@@ -30,7 +30,7 @@ const fastify = require("fastify")({
 });
 
 fastify.register(require("fastify-cors"), {});
-fastify.register(require("./cerbero"), {});
+fastify.register(require("./prego"), {});
 fastify.register(AutoLoad, {
   dir: path.join(__dirname + "/", "plugins")
 });
@@ -39,7 +39,7 @@ fastify.register(AutoLoad, {
 const start = async () => {
   try {
     await fastify.ready();
-    await fastify.cerbero.start(
+    await fastify.prego.start(
       process.env.PORT ? process.env.PORT : 80,
       process.env.HOST ? process.env.HOST : "0.0.0.0"
     );
