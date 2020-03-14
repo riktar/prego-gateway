@@ -1,5 +1,5 @@
 /**
- * @description Foo - A Cerbero Plugin
+ * @description Foo - A Prego Plugin
  * @author Riccardo Tartaglia
  */
 "use strict";
