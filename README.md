@@ -12,7 +12,7 @@ Prego is a pluggable API Gateway that allows to managing microservice / serverle
 - It's 100% JavaScript!
 - Easy to deploy (`sudo npm start` and you are done)
 - Easy to develop a new rule (all the Gateway Rules are .yaml file)
-- Pluggable (All the core is a Fastify Plugin)
+- Pluggable (All the core is a JavaScript module)
   
 ## Coming Soon
 - Test Coverage
