@@ -1,7 +1,3 @@
----
-description: 'A fast, simple and pluggable NodeJs API Gateway'
----
-
 # Prego
 
 Prego is a pluggable API Gateway that allows to managing microservice / serverless applications exposing them through APIs using Node.js and Fastify.
